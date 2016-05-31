@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8"> 
+
+<html><head>
+  <title>Accounts</title>
+  <link rel='stylesheet' type='text/css' href='css/accounts.css' />
+  <script type='text/javascript' src='js/jquery-1.11.3.min.js'></script>
+  <script type='text/javascript' src='js/handlebars.min-v4.0.5.js'></script>
+  <script type='text/javascript' src='js/accounts.js'></script>
+</head><body>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-menu-account-detail' type='text/x-template'>
+      <ul class='menu'>
+        <li> <a href='#' id='reload' title='Reload'>&#8635;</a> </li>
+        <li id='menu-other-accounts'> Other Accounts: 
+          {{> account_selector}}
+        </li>
+        <li id='menu-other-months'> Other Months
+          {{> menu_other_months}}
+        </li>
+      </ul>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-menu-other-accounts' type='text/x-template'>
+      <ul>
+        {{#each accounts_by_type_name}}
+        <li>{{type}}
+          <ul>
+            {{#each accounts}}
+            <li>{{name}}</li>
+            {{/each}}
+          </ul>
+        </li>
+        {{/each}}
+      </ul>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-menu-other-months' type='text/x-template'>
+      <ul class='sub-menu'>
+        {{#each all_active_months}}
+        <li>{{year}}</li>
+        {{/each}}
+      </ul>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-account-title' type='text/x-template'>
+      <h1>{{account_name}} for {{month_name month}} {{year}}</h1>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-account-selector' type=text/x-template'>
+      <select class='account-selector'>
+        {{#each accounts_by_type_name}}
+        <optgroup label='{{type}}'>
+          {{#each accounts}}
+          {{#if_eq id ../../account_id}}
+          <option value={{id}} selected='1'>{{name}}</option>
+          {{else}}
+          <option value={{id}}>{{name}}</option>
+          {{/if_eq}}
+          {{/each}}
+        </optgroup>
+        {{/each}}
+      </select>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-account-link' type='text/x-template'>
+      <a class='account-link' href='#'
+         data-year='{{year}}' data-month='{{month}}' data-id='{{id}}'
+         >{{name}}</a>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='partial-account-navigation' type='text/x-template'>
+      <p class='year-navigation'>
+        [ {{#each active_years}}
+        {{> account_link year=this month=../month id=../account_id name=this}}
+        {{/each}} ]
+      </p>
+      <p class='date-navigation'>
+        [ {{#each active_months}}
+          {{#if_eq this ../month}}
+            {{month_name this}}
+          {{else}}
+            {{> account_link year=../year month=this id=../account_id name=(month_name this)}}
+          {{/if_eq}}
+        {{/each}} ]
+      </p>
+    </script> <!-- partial-account-navigation -->
+
+    <!-- ################################################################ -->
+
+    <script id='partial-transaction-table' type='text/x-template'>
+      <table class='monthly-statement'>
+        <tr>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Amount</th>
+          <th>Pending</th>
+          <th>Cleared</th>
+          <th>Status</th>
+          <th>Note</th>
+        </tr>
+        <tr>
+          <td>{{year}}-{{month}}-01</td>
+          <td>Opening Balance</td>
+          <td></td>
+          <td class='money'>{{> pending_balance}}</td>
+          <td class='money'>{{> cleared_balance}}</td>
+          <td></td>
+          <td></td>
+        </tr>
+
+        {{#each transactions}}
+        <tr data-date-posted='{{date_posted}}'
+            data-from-id='{{from_id}}'
+            data-to-id='{{to_id}}'
+            data-id='{{id}}'
+            data-index='{{@index}}'
+            >
+          
+          <td>{{date_posted}}</td>
+          <td>
+            {{#with (other_account this ../account_id)}}
+              {{> account_link year=../../year month=../../month}}
+            {{/with}}
+          </td>
+
+          {{#if_eq to_id ../account_id}}
+          <td class='deposit money'>${{amount}}</td>
+          {{else}}
+          <td class='withdrawal money'>$-{{amount}}</td>
+          {{/if_eq}}
+
+          {{> tally_transaction this}}
+          <td class='money'>{{> pending_balance}}</td>
+          <td class='money'>{{> cleared_balance}}</td>
+          <td>
+            {{status_selector status}}
+          </td>
+          <td>{{#if note}}{{note}}{{/if}}</td>
+        </tr>
+        {{/each}}
+
+      </table>
+    </script> <!-- partial-transaction-table -->
+
+    <!-- ################################################################ -->
+
+    <script id='template-account-navigation' type='text/x-template'>
+      <ul>
+        {{#each accounts_by_name}}{{#if_eq type 'primary'}}
+        <li>{{> account_link year=../year month=../month}}</li>
+        {{/if_eq}}{{/each}}
+      </ul>
+      <select class='account-selector'>
+        {{#each accounts_by_name}}{{#if_eq type 'secondary'}}
+        <option value='{{id}}'>{{name}}</option>
+        {{/if_eq}}{{/each}}
+      </select>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <script id='template-account-details' type=text/x-template'>
+      {{> menu_account_detail}}
+      {{> account_title}}
+      {{> account_navigation}}
+      {{> transaction_table}}
+
+      <p>
+      <button id='add-new-transaction-button'>Add a new transaction</button>
+      </p>
+    </script>
+
+    <!-- ################################################################ -->
+
+    <div id='add-new-transaction-dialog' 
+         title='Add a new transaction' 
+         class='dialog'>
+      <p>Here's where the add new transaction stuff will go</p>
+
+    </div>
+    <!-- ################################################################ -->
+
+    <div id='display'>
+    </div>
+
+    <hr>
+    <p id='status'>Base HTML loaded</p>
+
+</body></html>
