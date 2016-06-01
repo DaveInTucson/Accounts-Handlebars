@@ -35,7 +35,7 @@ var app_ajax = {
         on_ajax_error : function(xhr, status, error) {},
     },
 
-    init : function(handlers)
+    initialize : function(handlers)
     { this.event_handlers = handlers; },
 
     load_accounts : function()
@@ -83,8 +83,11 @@ var app_main = {
                 outer_this.show_account_navigation();
             },
 
-            on_ajax_error : function(
-            });
+            on_ajax_error : function() {
+                
+            }
+
+        });
 
 
         this.set_status('initializing');
