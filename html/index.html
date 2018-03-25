@@ -3,12 +3,17 @@
 
 <html><head>
   <title>Accounts</title>
-  <link rel='stylesheet' type='text/css' href='css/accounts.css' />
-  <script type='text/javascript' src='js/jquery-1.11.3.min.js'></script>
-  <script type='text/javascript' src='js/handlebars.min-v4.0.5.js'></script>
+  <script type='text/javascript' src='/js/jquery-1.11.3.min.js'></script>
+  <script type='text/javascript' src='/js/handlebars.min-v4.0.5.js'></script>
   <script type='text/javascript' src='js/accounts.js'></script>
+  <link rel='stylesheet' type='text/css' href='css/accounts.css' />
 </head><body>
 
+    <p>
+      <a href='year-nav.html'>year-nav</a>
+      <a href='new.html'>new</a>
+    </p>
+    
     <!-- ################################################################ -->
 
     <script id='partial-menu-account-detail' type='text/x-template'>
@@ -200,5 +205,18 @@
 
     <hr>
     <p id='status'>Base HTML loaded</p>
+
+    <p>Todo:</p>
+    <ul>
+      <li>Display n last transactions for some value of n
+      <li>fix year navigation (Last year/next year links?)
+      <li>display all pending transactions
+      <li>monthly total deposits, withdrawals
+      <li>CU account balances
+      <li>other summary information?
+      <li>refactoring (rewrite?)
+      <li>add/edit transactions
+      <li>add/edit accounts
+    </ul>
 
 </body></html>
