@@ -1,8 +1,8 @@
 "use strict";
 
-var app_utils, app_view, app_ajax, app_main;
+#var app_utils, app_view, app_ajax, app_main;
 
-app_utils = {
+var app_utils = {
     /* Utility function for debugging */
     object_to_text: function(o)
     {
@@ -27,12 +27,29 @@ app_utils = {
 
 /* ---------------------------------------------------------------------- */
 
+var app_data = {
+    year       : 2000,
+    month      : 1,
+    account_id : 1,
+
+    accounts_by_id : null,
+    accounts_by_name : null,
+    accounts_by_type_name : null,
+
+    transactions : null,
+};
+
+/* ---------------------------------------------------------------------- */
+
 var app_ajax = {
+
+    server_prefix : '/cgi-bin/sa2/ajax/',
 
     event_handlers : {
         on_accounts_loaded : function(data) {},
 
-        on_ajax_error : function(xhr, status, error) {},
+        on_ajax_error : function(message, context)
+        { app_view.set_status(message + ': ' + context.responseText); },
     },
 
     initialize : function(handlers)
@@ -42,7 +59,7 @@ var app_ajax = {
     {
         $.ajax({
             type : 'GET',
-            url : '/cgi-bin/sa2/ajax/accounts',
+            url : this.server_prefix + 'accounts',
             context : this,
 
             success : this.events.on_accounts_loaded,
@@ -56,6 +73,43 @@ var app_ajax = {
 /* ---------------------------------------------------------------------- */
 
 var app_view = {
+    show_account_navigation : function()
+    {
+        // render template
+        var template_source = $('#template-account-navigation').html();
+        var template = Handlebars.compile(template_source);
+
+        var html_output = template({
+            year: app_data.year,
+            month: app_data.month,
+            accounts_by_name: this.accounts_by_name
+        });
+
+        $('#display').html(html_output);
+
+        // and set up listeners
+        var outer_this = this;
+        $('#display .account-link').click(
+            function(e)
+            {
+                e.preventDefault();
+                outer_this.follow_account_link($(this));
+            });
+
+        $('#display .account-selector').change(
+            function()
+            {
+                var $this = this;
+                $this.load_account_month_details($(this).val());
+            });
+
+        this.set_status('ready');
+    },
+
+    set_status : function(status)
+    {
+        $('#status').text(status);
+    },
 };
 
 /* ---------------------------------------------------------------------- */
@@ -79,13 +133,11 @@ var app_main = {
         let outer_this = this;
         app_ajax.initialize({
             on_accounts_loaded : function(accounts) {
-                outer_this.accounts = accounts;
-                outer_this.show_account_navigation();
+                app_data.accounts_by_id = accounts.accounts_by_id;
+                app_data.accounts_by_name = accounts.accounts_by_name;
+                app_data.accounts_by_type_name = accounts.accounts_by_type_name;
+                app_view.show_account_navigation();
             },
-
-            on_ajax_error : function() {
-                
-            }
 
         });
 
